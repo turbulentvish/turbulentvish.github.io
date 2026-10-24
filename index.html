@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vishal | Computational Fluid Dynamics</title>
+<meta name="description" content="Vishal — researcher in computational fluid dynamics and numerical methods for PDEs.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,600;12..96,800&family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&display=swap" rel="stylesheet">
+
+<style>
+/* =========================================================
+   COLOURS — change these to restyle the whole site
+   ========================================================= */
+:root{
+  --bg:#000000;          /* page background */
+  --fg:#ffffff;          /* main text */
+  --soft:#b8b8b8;        /* secondary text */
+  --faint:#5a5a5a;       /* hints, rules */
+  --line:#1c1c1c;        /* borders */
+  --green:#39ff14;       /* fluorescent green */
+  --cyan:#00e5ff;        /* fluorescent cyan */
+  --ring:#00e5ff;        /* second colour of the photo ring (fluorescent cyan) */
+  --nav-h:68px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:var(--nav-h);background:var(--bg)}
+body{
+  background:var(--bg);color:var(--fg);
+  font-family:'Bricolage Grotesque',system-ui,sans-serif;
+  font-size:17px;line-height:1.6;overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit}
+img{display:block;max-width:100%}
+::selection{background:var(--cyan);color:#000}
+
+.neon-g{color:var(--green);text-shadow:0 0 6px rgba(57,255,20,.7),0 0 18px rgba(57,255,20,.35)}
+.neon-p{color:var(--cyan);text-shadow:0 0 6px rgba(0,229,255,.7),0 0 18px rgba(0,229,255,.35)}
+
+:focus-visible{outline:2px solid var(--green);outline-offset:3px;border-radius:4px}
+
+/* =========================================================
+   CUSTOM CURSOR — system cursor hidden, replaced by a circle
+   (only on devices with a mouse; touch screens are untouched)
+   ========================================================= */
+@media (hover:hover) and (pointer:fine){
+  html,body,*{cursor:none !important}
+}
+.cursor{
+  position:fixed;left:0;top:0;z-index:10000;pointer-events:none;
+  width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;
+  border:2px solid var(--green);
+  box-shadow:0 0 10px rgba(57,255,20,.8),inset 0 0 6px rgba(57,255,20,.5);
+  transition:width .2s,height .2s,margin .2s,border-color .2s,box-shadow .2s,background .2s,opacity .2s;
+  opacity:0;will-change:transform;
+}
+.cursor.on{opacity:1}
+.cursor.hover{
+  width:56px;height:56px;margin:-28px 0 0 -28px;
+  border-color:var(--cyan);background:rgba(0,229,255,.10);
+  box-shadow:0 0 14px rgba(0,229,255,.85),inset 0 0 8px rgba(0,229,255,.5);
+}
+.cursor.down{width:20px;height:20px;margin:-10px 0 0 -10px}
+@media (hover:none),(pointer:coarse){.cursor{display:none}}
+
+/* =========================================================
+   TOP NAVIGATION TABS
+   ========================================================= */
+header{
+  position:fixed;inset:0 0 auto 0;z-index:100;height:var(--nav-h);
+  background:rgba(0,0,0,.78);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line);
+}
+nav{max-width:1120px;height:100%;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.brand{font-weight:800;font-size:1.25rem;letter-spacing:-.02em;text-decoration:none;white-space:nowrap}
+.brand span{color:var(--green)}
+.tabs{display:flex;gap:2px;list-style:none}
+.tabs a{
+  display:block;padding:7px 14px;border-radius:999px;text-decoration:none;
+  font-size:.95rem;color:var(--soft);transition:color .2s,background .2s,box-shadow .2s;white-space:nowrap;
+}
+.tabs a:hover{color:var(--cyan);text-shadow:0 0 8px rgba(0,229,255,.6)}
+.tabs a.active{color:#000;background:var(--green);box-shadow:0 0 16px rgba(57,255,20,.55);text-shadow:none}
+
+@media (max-width:760px){
+  :root{--nav-h:104px}
+  nav{flex-direction:column;justify-content:center;gap:8px;padding:0 16px}
+  .tabs{width:100%;overflow-x:auto;scrollbar-width:none;justify-content:flex-start}
+  .tabs::-webkit-scrollbar{display:none}
+  .tabs a{padding:6px 12px;font-size:.9rem}
+}
+
+/* =========================================================
+   LAYOUT
+   ========================================================= */
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+section{position:relative;padding:120px 0 100px;border-top:1px solid var(--line)}
+section:first-of-type{border-top:0}
+.sec-title{
+  font-size:clamp(2.4rem,6vw,4.2rem);font-weight:800;letter-spacing:-.035em;line-height:1;
+  margin-bottom:14px;
+}
+.sec-intro{color:var(--soft);max-width:62ch;margin-bottom:56px;font-size:1.05rem}
+@media (max-width:760px){.wrap{padding:0 16px} section{padding:80px 0 70px}}
+
+/* =========================================================
+   ABOUT (hero with live flow animation)
+   ========================================================= */
+#about{min-height:100vh;display:flex;align-items:center;padding-top:calc(var(--nav-h) + 40px);overflow:hidden}
+#flow{position:absolute;inset:0;width:100%;height:100%;opacity:.75}
+#about::after{ /* darkens the left side so text stays readable */
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(90deg,#000 0%,rgba(0,0,0,.85) 38%,rgba(0,0,0,.25) 75%,rgba(0,0,0,.1) 100%);
+}
+#about .wrap{position:relative;z-index:2;width:100%}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:56px;align-items:center}
+
+/* portrait: circular photo inside a green-to-cyan glowing ring */
+.portrait{
+  width:clamp(220px,26vw,340px);aspect-ratio:1;border-radius:50%;padding:3px;
+  background:conic-gradient(from 210deg,var(--green),var(--ring),var(--green));
+  box-shadow:0 0 28px rgba(57,255,20,.35),0 0 64px rgba(0,229,255,.22);
+}
+.portrait .inner{position:relative;width:100%;height:100%;border-radius:50%;overflow:hidden;background:#000;border:6px solid #000}
+.portrait img{width:100%;height:100%;object-fit:cover;object-position:center 30%}
+.portrait .fallback{
+  position:absolute;inset:0;display:none;place-items:center;
+  font-size:clamp(5rem,9vw,8rem);font-weight:800;letter-spacing:-.05em;color:var(--fg);
+}
+.portrait.no-photo img{display:none}
+.portrait.no-photo .fallback{display:grid}
+@media (max-width:860px){
+  .hero-grid{grid-template-columns:1fr;gap:28px}
+  .portrait{order:-1;width:150px}
+  .portrait .inner{border-width:4px}
+}
+.hello{font-size:1.1rem;color:var(--soft);margin-bottom:10px}
+.name{
+  font-size:clamp(3.4rem,11vw,8.5rem);font-weight:800;letter-spacing:-.05em;line-height:.9;
+  margin-bottom:28px;
+}
+.name .apos{color:var(--cyan);text-shadow:0 0 10px rgba(0,229,255,.8),0 0 30px rgba(0,229,255,.4)}
+.role{font-size:clamp(1.25rem,2.4vw,1.6rem);font-weight:300;max-width:30ch;line-height:1.3;margin-bottom:28px}
+.bio{max-width:58ch;color:var(--soft);margin-bottom:14px}
+.bio strong{color:var(--fg);font-weight:600}
+.links{display:flex;flex-wrap:wrap;gap:10px;margin-top:34px}
+.btn{
+  display:inline-block;padding:10px 20px;border-radius:999px;text-decoration:none;font-weight:600;font-size:.95rem;
+  border:1.5px solid var(--faint);color:var(--fg);transition:border-color .2s,color .2s,box-shadow .2s;
+}
+.btn:hover{border-color:var(--green);color:var(--green);box-shadow:0 0 14px rgba(57,255,20,.4)}
+.btn.primary{background:var(--green);border-color:var(--green);color:#000}
+.btn.primary:hover{color:#000;box-shadow:0 0 22px rgba(57,255,20,.75)}
+.flow-note{position:absolute;right:24px;bottom:22px;z-index:2;font-size:.8rem;color:var(--faint);font-family:'Newsreader',serif;font-style:italic}
+@media (max-width:760px){.flow-note{display:none}}
+
+/* =========================================================
+   RESEARCH
+   ========================================================= */
+.research{display:grid;grid-template-columns:repeat(2,1fr);gap:0;border-top:1px solid var(--line)}
+.topic{padding:34px 34px 38px 0;border-bottom:1px solid var(--line)}
+.topic:nth-child(even){padding:34px 0 38px 34px;border-left:1px solid var(--line)}
+.topic h3{font-size:1.45rem;font-weight:600;letter-spacing:-.015em;line-height:1.2;margin-bottom:10px;transition:color .2s}
+.topic:hover h3{color:var(--green);text-shadow:0 0 10px rgba(57,255,20,.45)}
+.topic p{color:var(--soft)}
+.topic .kw{margin-top:14px;display:flex;flex-wrap:wrap;gap:6px}
+.topic .kw span{font-size:.8rem;color:var(--cyan);border:1px solid rgba(0,229,255,.4);border-radius:999px;padding:2px 10px}
+@media (max-width:760px){
+  .research{grid-template-columns:1fr}
+  .topic,.topic:nth-child(even){padding:28px 0;border-left:0}
+}
+
+/* =========================================================
+   PUBLICATIONS
+   ========================================================= */
+.pub-filter{display:flex;flex-wrap:wrap;gap:8px;margin:-24px 0 36px}
+.pub-filter button{
+  font:inherit;font-size:.9rem;background:none;color:var(--soft);border:1.5px solid var(--line);
+  padding:6px 16px;border-radius:999px;transition:all .2s;
+}
+.pub-filter button:hover{color:var(--fg);border-color:var(--faint)}
+.pub-filter button.on{color:#000;background:var(--cyan);border-color:var(--cyan);box-shadow:0 0 14px rgba(0,229,255,.55)}
+.pubs{list-style:none}
+.pub{display:grid;grid-template-columns:90px 1fr;gap:24px;padding:26px 0;border-top:1px solid var(--line)}
+.pub:last-child{border-bottom:1px solid var(--line)}
+.pub .yr{font-size:1.6rem;font-weight:800;color:var(--faint);letter-spacing:-.03em;line-height:1.1}
+.pub:hover .yr{color:var(--green);text-shadow:0 0 10px rgba(57,255,20,.5)}
+.pub h3{font-size:1.2rem;font-weight:600;line-height:1.35;margin-bottom:6px}
+.pub .au{color:var(--soft);font-size:.95rem}
+.pub .au b{color:var(--fg);font-weight:600;text-decoration:underline;text-decoration-color:var(--green);text-underline-offset:3px}
+.pub .venue{font-family:'Newsreader',serif;font-style:italic;color:var(--soft);font-size:1.02rem;margin-top:2px}
+.pub .tag{display:inline-block;font-size:.75rem;font-weight:600;padding:1px 9px;border-radius:999px;margin-left:8px;vertical-align:2px}
+.tag.journal{color:var(--green);border:1px solid rgba(57,255,20,.5)}
+.tag.conference{color:#fff;border:1px solid var(--faint)}
+.tag.preprint{color:var(--cyan);border:1px solid rgba(0,229,255,.5)}
+.pub .plinks{margin-top:10px;display:flex;gap:16px;font-size:.9rem}
+.pub .plinks a{color:var(--green);text-decoration:none;border-bottom:1px solid transparent}
+.pub .plinks a:hover{border-color:var(--green)}
+@media (max-width:600px){.pub{grid-template-columns:1fr;gap:6px}}
+
+/* =========================================================
+   PRESENTATIONS (timeline)
+   ========================================================= */
+.timeline{list-style:none;position:relative;margin-left:8px}
+.timeline::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:2px;background:linear-gradient(var(--green),var(--cyan))}
+.talk{position:relative;padding:0 0 44px 40px}
+.talk:last-child{padding-bottom:0}
+.talk::before{
+  content:"";position:absolute;left:-6px;top:6px;width:14px;height:14px;border-radius:50%;
+  background:#000;border:2px solid var(--green);box-shadow:0 0 10px rgba(57,255,20,.7);
+}
+.talk.poster::before{border-color:var(--cyan);box-shadow:0 0 10px rgba(0,229,255,.7)}
+.talk .when{font-size:.9rem;color:var(--soft)}
+.talk .kind{font-weight:600;margin-left:6px}
+.talk.oral .kind{color:var(--green)}
+.talk.poster .kind{color:var(--cyan)}
+.talk h3{font-size:1.3rem;font-weight:600;line-height:1.3;margin:4px 0 4px}
+.talk .where{font-family:'Newsreader',serif;font-style:italic;color:var(--soft);font-size:1.05rem}
+.talk .tlinks{margin-top:8px;display:flex;gap:16px;font-size:.9rem}
+.talk .tlinks a{color:var(--green);text-decoration:none}
+.talk .tlinks a:hover{text-decoration:underline}
+
+/* =========================================================
+   GALLERY
+   ========================================================= */
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
+.g-item{position:relative;background:none;border:1px solid var(--line);border-radius:10px;overflow:hidden;text-align:left;font:inherit;color:inherit;padding:0}
+.g-item .frame{aspect-ratio:4/3;overflow:hidden;background:#050505}
+.g-item img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease}
+.g-item:hover{border-color:var(--cyan);box-shadow:0 0 18px rgba(0,229,255,.35)}
+.g-item:hover img{transform:scale(1.05)}
+.g-item figcaption{padding:12px 14px 14px;font-size:.95rem}
+.g-item figcaption small{display:block;color:var(--soft);font-size:.82rem;margin-top:2px}
+.g-item[data-pattern] .frame::after{
+  content:"placeholder";position:absolute;top:10px;right:10px;font-size:.72rem;color:#000;background:rgba(255,255,255,.85);
+  padding:2px 8px;border-radius:999px;
+}
+
+/* lightbox */
+.lightbox{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.94);display:none;align-items:center;justify-content:center;padding:60px 70px}
+.lightbox.open{display:flex}
+.lightbox figure{max-width:1100px;width:100%;display:flex;flex-direction:column;align-items:center}
+.lightbox img{max-height:76vh;width:auto;max-width:100%;border-radius:8px;box-shadow:0 0 40px rgba(57,255,20,.15)}
+.lightbox figcaption{margin-top:16px;text-align:center;color:var(--soft)}
+.lightbox figcaption b{color:var(--fg);font-weight:600}
+.lb-btn{position:absolute;background:none;border:1.5px solid var(--faint);color:var(--fg);width:46px;height:46px;border-radius:50%;font-size:1.3rem;line-height:1;transition:all .2s}
+.lb-btn:hover{border-color:var(--green);color:var(--green);box-shadow:0 0 12px rgba(57,255,20,.5)}
+.lb-close{top:18px;right:18px}
+.lb-prev{left:14px;top:50%;transform:translateY(-50%)}
+.lb-next{right:14px;top:50%;transform:translateY(-50%)}
+@media (max-width:600px){.lightbox{padding:70px 12px}.lb-prev,.lb-next{top:auto;bottom:16px;transform:none}}
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+footer{border-top:1px solid var(--line);padding:40px 0 50px;color:var(--faint);font-size:.9rem}
+footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+footer a{color:var(--soft);text-decoration:none}
+footer a:hover{color:var(--green)}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *{transition:none !important}
+}
+</style>
+</head>
+
+<body>
+
+<div class="cursor" aria-hidden="true"></div>
+
+<!-- ================= NAVIGATION ================= -->
+<header>
+  <nav aria-label="Main">
+    <a class="brand" href="#about">Vishal</a>
+    <ul class="tabs">
+      <li><a href="#about">About me</a></li>
+      <li><a href="#research">Research</a></li>
+      <li><a href="#publications">Publications</a></li>
+      <li><a href="#presentations">Presentations</a></li>
+      <li><a href="#gallery">Gallery</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main>
+
+<!-- ================= ABOUT ME ================= -->
+<section id="about">
+  <canvas id="flow" aria-hidden="true"></canvas>
+  <div class="wrap hero-grid">
+    <div class="hero-text">
+    <p class="hello">Hello, I'm</p>
+    <h1 class="name">Vishal</h1>
+    <p class="role">I build numerical methods for <span class="neon-g">fluid flows</span> and <span class="neon-p">moving interfaces</span>.</p>
+
+    <!-- EDIT: your bio -->
+    <p class="bio">I'm a PhD researcher at <strong>IIT Ropar</strong> working at the meeting point of numerical analysis and fluid mechanics. My work covers finite element and discontinuous Galerkin discretisations of PDEs, phase-field models of multiphase flow, and the instabilities that shape interfaces in confined geometries.</p>
+    <p class="bio">I care about schemes that respect the physics — conserving mass, dissipating energy the way the continuous model does — and about making them fast enough to use, through careful solver and preconditioner design in <strong>Firedrake</strong> and <strong>PETSc</strong>.</p>
+
+    <!-- EDIT: replace # with your real links (delete any you don't need) -->
+    <div class="links">
+      <a class="btn primary" href="mailto:your.email@iitrpr.ac.in">Email me</a>
+      <a class="btn" href="#" target="_blank" rel="noopener">Google Scholar</a>
+      <a class="btn" href="#" target="_blank" rel="noopener">GitHub</a>
+      <a class="btn" href="#" target="_blank" rel="noopener">ORCID</a>
+      <a class="btn" href="cv.pdf" target="_blank" rel="noopener">CV (PDF)</a>
+    </div>
+    </div>
+
+    <!-- EDIT: your photo. Save it as images/profile.jpg (a square-ish crop works best).
+         Until that file exists, a "V" placeholder is shown instead. -->
+    <div class="portrait">
+      <div class="inner">
+        <img src="images/profile.jpg" alt="Portrait of Vishal" onerror="this.closest('.portrait').classList.add('no-photo')">
+        <span class="fallback" aria-hidden="true">V</span>
+      </div>
+    </div>
+  </div>
+  <p class="flow-note">Background: tracer particles in a drifting Taylor–Green vortex field</p>
+</section>
+
+<!-- ================= RESEARCH ================= -->
+<section id="research">
+  <div class="wrap">
+    <h2 class="sec-title">Research</h2>
+    <p class="sec-intro">My research sits between theory and implementation: designing discretisations with provable structure, then building and testing them on hard multiphase problems.</p>
+
+    <!-- EDIT: add / remove / rewrite topics. Each <article class="topic"> is one block. -->
+    <div class="research">
+      <article class="topic">
+        <h3>Conservative diffuse-interface methods</h3>
+        <p>Phase-field formulations that keep each fluid's volume exactly conserved while keeping interfaces sharp and bounded. I implement and benchmark these in Firedrake on standard interface-transport and two-phase flow tests.</p>
+        <div class="kw"><span>Phase-field</span><span>Mass conservation</span><span>Benchmarks</span></div>
+      </article>
+      <article class="topic">
+        <h3>Structure-preserving DG for Cahn–Hilliard</h3>
+        <p>Mixed discontinuous Galerkin schemes for Cahn–Hilliard-type equations that inherit mass conservation and discrete energy dissipation from the continuous model.</p>
+        <div class="kw"><span>Mixed DG</span><span>Energy stability</span><span>Gradient flows</span></div>
+      </article>
+      <article class="topic">
+        <h3>Hele-Shaw flows and interfacial instability</h3>
+        <p>Diffuse-interface models of flow in thin gaps, where viscosity contrasts drive fingering. I study how the numerics influence the onset and growth of these patterns.</p>
+        <div class="kw"><span>Hele-Shaw</span><span>Viscous fingering</span><span>Stability</span></div>
+      </article>
+      <article class="topic">
+        <h3>Spinodal decomposition</h3>
+        <p>Linear growth rates and early-time dynamics of phase separation, comparing analytical dispersion relations with fully nonlinear simulations.</p>
+        <div class="kw"><span>Linear stability</span><span>Growth rates</span></div>
+      </article>
+      <article class="topic">
+        <h3>Pseudospectral solvers</h3>
+        <p>Fourier pseudospectral methods for periodic phase-field problems, used both as fast solvers and as high-accuracy references for finite element results.</p>
+        <div class="kw"><span>Spectral methods</span><span>FFT</span></div>
+      </article>
+      <article class="topic">
+        <h3>Parameter-robust solvers</h3>
+        <p>Block preconditioners and solver configurations whose performance holds up as physical parameters, interface width and mesh size change.</p>
+        <div class="kw"><span>Preconditioning</span><span>PETSc</span><span>Robustness</span></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PUBLICATIONS ================= -->
+<section id="publications">
+  <div class="wrap">
+    <h2 class="sec-title">Publications</h2>
+    <p class="sec-intro">Peer-reviewed articles, conference papers and preprints. My name is underlined.</p>
+
+    <div class="pub-filter" role="group" aria-label="Filter publications">
+      <button class="on" data-filter="all">All</button>
+      <button data-filter="journal">Journal</button>
+      <button data-filter="conference">Conference</button>
+      <button data-filter="preprint">Preprint</button>
+    </div>
+
+    <!-- EDIT: one <li class="pub" data-type="journal|conference|preprint"> per paper, newest first -->
+    <ol class="pubs">
+      <li class="pub" data-type="preprint">
+        <div class="yr">2026</div>
+        <div>
+          <h3>Title of your preprint goes here<span class="tag preprint">Preprint</span></h3>
+          <p class="au"><b>Vishal</b>, Co-author A, Supervisor B</p>
+          <p class="venue">arXiv:0000.00000</p>
+          <p class="plinks"><a href="#">arXiv</a><a href="#">PDF</a><a href="#">Code</a></p>
+        </div>
+      </li>
+      <li class="pub" data-type="journal">
+        <div class="yr">2025</div>
+        <div>
+          <h3>Title of your journal article goes here<span class="tag journal">Journal</span></h3>
+          <p class="au">Co-author A, <b>Vishal</b>, Supervisor B</p>
+          <p class="venue">Journal Name, Vol. 00, pp. 000–000</p>
+          <p class="plinks"><a href="#">DOI</a><a href="#">PDF</a></p>
+        </div>
+      </li>
+      <li class="pub" data-type="conference">
+        <div class="yr">2024</div>
+        <div>
+          <h3>Title of your conference paper goes here<span class="tag conference">Conference</span></h3>
+          <p class="au"><b>Vishal</b>, Supervisor B</p>
+          <p class="venue">Proceedings of Conference Name, City</p>
+          <p class="plinks"><a href="#">Paper</a><a href="#">Slides</a></p>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- ================= PRESENTATIONS ================= -->
+<section id="presentations">
+  <div class="wrap">
+    <h2 class="sec-title">Presentations</h2>
+    <p class="sec-intro">Talks and posters, most recent first. <span class="neon-g">Green</span> marks a talk, <span class="neon-p">cyan</span> a poster.</p>
+
+    <!-- EDIT: class="talk oral" for talks, class="talk poster" for posters -->
+    <ol class="timeline">
+      <li class="talk oral">
+        <p class="when">Month 2026 <span class="kind">Talk</span></p>
+        <h3>Title of your talk</h3>
+        <p class="where">Conference or Workshop Name, City, Country</p>
+        <p class="tlinks"><a href="#">Slides</a><a href="#">Abstract</a></p>
+      </li>
+      <li class="talk poster">
+        <p class="when">Month 2025 <span class="kind">Poster</span></p>
+        <h3>Title of your poster</h3>
+        <p class="where">Event Name, Venue</p>
+        <p class="tlinks"><a href="#">Poster PDF</a></p>
+      </li>
+      <li class="talk oral">
+        <p class="when">Month 2025 <span class="kind">Talk</span></p>
+        <h3>Title of a seminar talk</h3>
+        <p class="where">Department Seminar, IIT Ropar</p>
+        <p class="tlinks"><a href="#">Slides</a></p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- ================= GALLERY ================= -->
+<section id="gallery">
+  <div class="wrap">
+    <h2 class="sec-title">Gallery</h2>
+    <p class="sec-intro">Snapshots from simulations, conferences and the lab. Click any image to enlarge it.</p>
+
+    <!--
+      EDIT: to use your own image, put it in an "images" folder and change
+        <img data-pattern="spinodal" data-seed="3" alt="...">
+      to
+        <img src="images/my-figure.png" alt="...">
+      and remove data-pattern from the <figure> too.
+      The placeholders below are drawn by the browser so the page looks complete before you add images.
+    -->
+    <div class="gallery">
+      <figure class="g-item" data-pattern tabindex="0">
+        <div class="frame"><img data-pattern="spinodal" data-seed="3" alt="Spinodal decomposition pattern"></div>
+        <figcaption>Spinodal decomposition<small>Early-time phase separation</small></figcaption>
+      </figure>
+      <figure class="g-item" data-pattern tabindex="0">
+        <div class="frame"><img data-pattern="finger" data-seed="11" alt="Viscous fingering pattern"></div>
+        <figcaption>Viscous fingering<small>Radial Hele-Shaw cell</small></figcaption>
+      </figure>
+      <figure class="g-item" data-pattern tabindex="0">
+        <div class="frame"><img data-pattern="vortex" data-seed="5" alt="Vorticity field"></div>
+        <figcaption>Vorticity field<small>Perturbed vortex lattice</small></figcaption>
+      </figure>
+      <figure class="g-item" data-pattern tabindex="0">
+        <div class="frame"><img data-pattern="spinodal" data-seed="21" alt="Coarsening pattern"></div>
+        <figcaption>Coarsening<small>Late-time Cahn–Hilliard dynamics</small></figcaption>
+      </figure>
+      <figure class="g-item" data-pattern tabindex="0">
+        <div class="frame"><img data-pattern="finger" data-seed="42" alt="Fingering at higher viscosity contrast"></div>
+        <figcaption>Tip splitting<small>Higher viscosity contrast</small></figcaption>
+      </figure>
+      <figure class="g-item" data-pattern tabindex="0">
+        <div class="frame"><img data-pattern="vortex" data-seed="8" alt="Vorticity contours"></div>
+        <figcaption>Vorticity contours<small>Two-dimensional decaying flow</small></figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© <span id="yr"></span> Vishal</span>
+    <a href="#about">Back to top</a>
+  </div>
+</footer>
+
+<!-- lightbox -->
+<div class="lightbox" role="dialog" aria-modal="true" aria-label="Image viewer">
+  <button class="lb-btn lb-close" aria-label="Close">✕</button>
+  <button class="lb-btn lb-prev" aria-label="Previous image">‹</button>
+  <button class="lb-btn lb-next" aria-label="Next image">›</button>
+  <figure><img alt=""><figcaption></figcaption></figure>
+</div>
+
+<script>
+document.getElementById('yr').textContent = new Date().getFullYear();
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------------- custom circular cursor ---------------- */
+(() => {
+  const cur = document.querySelector('.cursor');
+  if (!matchMedia('(hover:hover) and (pointer:fine)').matches) return;
+  let x = -100, y = -100, cx = -100, cy = -100;
+  addEventListener('mousemove', e => { x = e.clientX; y = e.clientY; cur.classList.add('on'); });
+  document.addEventListener('mouseleave', () => cur.classList.remove('on'));
+  addEventListener('mousedown', () => cur.classList.add('down'));
+  addEventListener('mouseup', () => cur.classList.remove('down'));
+  const hoverSel = 'a, button, .g-item, .topic';
+  document.addEventListener('mouseover', e => { if (e.target.closest(hoverSel)) cur.classList.add('hover'); });
+  document.addEventListener('mouseout', e => { if (e.target.closest(hoverSel) && !e.relatedTarget?.closest?.(hoverSel)) cur.classList.remove('hover'); });
+  (function loop(){
+    const k = reduceMotion ? 1 : 0.28;
+    cx += (x - cx) * k; cy += (y - cy) * k;
+    cur.style.transform = `translate(${cx}px, ${cy}px)`;
+    requestAnimationFrame(loop);
+  })();
+})();
+
+/* ---------------- active tab while scrolling ---------------- */
+(() => {
+  const links = [...document.querySelectorAll('.tabs a')];
+  const byId = Object.fromEntries(links.map(a => [a.getAttribute('href').slice(1), a]));
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if (en.isIntersecting) {
+        links.forEach(a => a.classList.remove('active'));
+        const a = byId[en.target.id];
+        a.classList.add('active');
+        a.scrollIntoView({block:'nearest', inline:'nearest'}); // keeps the tab visible on phones
+      }
+    });
+  }, { rootMargin: '-45% 0px -50% 0px' });
+  document.querySelectorAll('main section').forEach(s => io.observe(s));
+})();
+
+/* ---------------- hero: particles advected by a Taylor–Green field ---------------- */
+(() => {
+  const c = document.getElementById('flow'), ctx = c.getContext('2d');
+  let w, h, parts = [], t = 0, running = true;
+  const L = 170;                       // vortex cell size (px)
+  const k = Math.PI / L;
+  function vel(x, y) {
+    const ph = t * 0.004;
+    return [ Math.sin(k*x + ph) * Math.cos(k*y) + 0.45,     // u = dψ/dy  (+ uniform drift)
+            -Math.cos(k*x + ph) * Math.sin(k*y) ];          // v = -dψ/dx
+  }
+  function spawn(p) { p.x = Math.random()*w; p.y = Math.random()*h; p.age = 0; p.life = 80 + Math.random()*220; p.cyan = Math.random() < 0.3; return p; }
+  function resize() {
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    w = c.clientWidth; h = c.clientHeight;
+    c.width = w * dpr; c.height = h * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, w, h);
+    const n = Math.min(1100, Math.floor(w * h / 1300));
+    parts = Array.from({length: n}, () => spawn({}));
+  }
+  function step() {
+    ctx.fillStyle = 'rgba(0,0,0,0.07)'; ctx.fillRect(0, 0, w, h);
+    ctx.lineWidth = 1.2;
+    for (const p of parts) {
+      const [u, v] = vel(p.x, p.y);
+      const nx = p.x + u * 1.7, ny = p.y + v * 1.7;
+      const a = Math.min(1, p.age / 20, (p.life - p.age) / 20) * 0.9;
+      ctx.strokeStyle = p.cyan ? `rgba(0,229,255,${a})` : `rgba(57,255,20,${a})`;
+      ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(nx, ny); ctx.stroke();
+      p.x = nx; p.y = ny; p.age++;
+      if (p.age > p.life || p.x > w + 5 || p.x < -5 || p.y < -5 || p.y > h + 5) spawn(p);
+    }
+    t++;
+  }
+  function loop() { if (running) step(); requestAnimationFrame(loop); }
+  resize();
+  addEventListener('resize', resize);
+  if (reduceMotion) { for (let i = 0; i < 160; i++) step(); return; }
+  new IntersectionObserver(([e]) => running = e.isIntersecting).observe(c);
+  loop();
+})();
+
+/* ---------------- publication filter ---------------- */
+(() => {
+  const btns = document.querySelectorAll('.pub-filter button');
+  btns.forEach(b => b.addEventListener('click', () => {
+    btns.forEach(x => x.classList.toggle('on', x === b));
+    const f = b.dataset.filter;
+    document.querySelectorAll('.pub').forEach(p => p.style.display = (f === 'all' || p.dataset.type === f) ? '' : 'none');
+  }));
+})();
+
+/* ---------------- gallery placeholders (procedurally drawn) ---------------- */
+(() => {
+  function rng(s){ return () => { s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  const G = [57,255,20], P = [0,229,255];
+  function paint(kind, seed) {
+    const W = 480, H = 360, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    const g = cv.getContext('2d'), img = g.createImageData(W, H), d = img.data, r = rng(seed);
+    const put = (i, c, s) => { d[i] = c[0]*s; d[i+1] = c[1]*s; d[i+2] = c[2]*s; d[i+3] = 255; };
+    if (kind === 'spinodal') {
+      const M = 40, k0 = seed > 10 ? 0.05 : 0.085, modes = [];
+      for (let m = 0; m < M; m++) { const a = r()*Math.PI*2, kk = k0*(0.8 + 0.4*r()); modes.push([kk*Math.cos(a), kk*Math.sin(a), r()*Math.PI*2]); }
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+        let s = 0; for (const m of modes) s += Math.cos(m[0]*x + m[1]*y + m[2]);
+        const phi = Math.tanh(2.6 * s / Math.sqrt(M)), glow = 1 - phi*phi;
+        put((y*W + x)*4, phi > 0 ? P : G, 0.12 + 0.88*Math.pow(glow, 1.6));
+      }
+    } else if (kind === 'finger') {
+      const N = 7, modes = []; for (let n = 0; n < N; n++) modes.push([4 + Math.floor(r()*10), 0.04 + 0.12*r(), r()*Math.PI*2]);
+      const cx = W/2, cy = H/2, R0 = Math.min(W, H) * 0.3;
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+        const dx = x - cx, dy = y - cy, rr = Math.hypot(dx, dy), th = Math.atan2(dy, dx);
+        let R = 1; for (const m of modes) R += m[1] * Math.cos(m[0]*th + m[2]) * Math.min(1, rr / R0);
+        const phi = Math.tanh((R0*R - rr) / 5), glow = 1 - phi*phi;
+        if (phi > 0) put((y*W + x)*4, P, 0.10 + 0.25*phi + 0.65*glow);
+        else put((y*W + x)*4, G, 0.9*Math.pow(glow, 1.4));
+      }
+    } else { // vortex
+      const kx = Math.PI / (60 + r()*40), ky = kx * (0.8 + 0.4*r()), modes = [];
+      for (let m = 0; m < 10; m++) modes.push([(r()-.5)*0.08, (r()-.5)*0.08, r()*Math.PI*2, 0.35*r()]);
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+        let w = Math.sin(kx*x) * Math.sin(ky*y);
+        for (const m of modes) w += m[3] * Math.cos(m[0]*x + m[1]*y + m[2]);
+        const lv = w * 7, contour = Math.pow(1 - Math.abs(lv - Math.round(lv)) * 2, 10);
+        put((y*W + x)*4, w > 0 ? G : P, Math.min(1, 0.08 + 0.45*Math.min(1, Math.abs(w)) + 0.6*contour));
+      }
+    }
+    g.putImageData(img, 0, 0);
+    return cv.toDataURL('image/png');
+  }
+  const imgs = [...document.querySelectorAll('img[data-pattern]')];
+  let i = 0;
+  (function next(){ // draw one at a time so the page stays responsive
+    if (i >= imgs.length) return;
+    const im = imgs[i++]; im.src = paint(im.dataset.pattern, +im.dataset.seed || 1);
+    setTimeout(next, 30);
+  })();
+})();
+
+/* ---------------- lightbox ---------------- */
+(() => {
+  const lb = document.querySelector('.lightbox'), lbImg = lb.querySelector('img'), lbCap = lb.querySelector('figcaption');
+  const items = [...document.querySelectorAll('.g-item')];
+  let idx = 0, lastFocus = null;
+  function show(i) {
+    idx = (i + items.length) % items.length;
+    const it = items[idx], im = it.querySelector('img'), fc = it.querySelector('figcaption');
+    lbImg.src = im.src; lbImg.alt = im.alt;
+    const title = fc.childNodes[0].textContent.trim(), sub = fc.querySelector('small')?.textContent || '';
+    lbCap.innerHTML = `<b>${title}</b>${sub ? ' — ' + sub : ''}`;
+  }
+  function open(i) { lastFocus = document.activeElement; show(i); lb.classList.add('open'); document.body.style.overflow = 'hidden'; lb.querySelector('.lb-close').focus(); }
+  function close() { lb.classList.remove('open'); document.body.style.overflow = ''; lastFocus?.focus(); }
+  items.forEach((it, i) => {
+    it.addEventListener('click', () => open(i));
+    it.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(i); } });
+  });
+  lb.querySelector('.lb-close').onclick = close;
+  lb.querySelector('.lb-prev').onclick = () => show(idx - 1);
+  lb.querySelector('.lb-next').onclick = () => show(idx + 1);
+  lb.addEventListener('click', e => { if (e.target === lb) close(); });
+  addEventListener('keydown', e => {
+    if (!lb.classList.contains('open')) return;
+    if (e.key === 'Escape') close();
+    if (e.key === 'ArrowLeft') show(idx - 1);
+    if (e.key === 'ArrowRight') show(idx + 1);
+  });
+})();
+</script>
+</body>
+</html>
